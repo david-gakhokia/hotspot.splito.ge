@@ -194,47 +194,191 @@ class MikrotikService
         return $profiles;
     }
 
+    // Hotspot Server Configuration Methods
+    public function getHotspotServers(): array
+    {
+        $this->write(['/ip/hotspot/print']);
+        $response = $this->read();
+
+        $servers = [];
+        $current = [];
+
+        foreach ($response as $line) {
+            if ($line === '!re') {
+                if (!empty($current)) {
+                    $servers[] = $current;
+                    $current = [];
+                }
+            } elseif (str_starts_with($line, '=') && str_contains($line, '=')) {
+                $parts = explode('=', $line);
+                if (count($parts) >= 3) {
+                    $key = $parts[1];
+                    $value = $parts[2];
+                    $current[$key] = $value;
+                }
+            }
+        }
+
+        return $servers;
+    }
+
+    public function enableHotspotServer(string $interface, string $profile = 'default'): array
+    {
+        $command = [
+            '/ip/hotspot/add',
+            '=name=' . $interface,
+            '=interface=' . $interface,
+            '=profile=' . $profile
+        ];
+
+        $this->write($command);
+        return $this->read();
+    }
+
+    public function disableHotspotServer(string $id): array
+    {
+        $this->write(['/ip/hotspot/remove', '.id=' . $id]);
+        return $this->read();
+    }
+
+    // Hotspot Server Profile Methods
+    public function getHotspotServerProfiles(): array
+    {
+        $this->write(['/ip/hotspot/profile/print']);
+        $response = $this->read();
+
+        $profiles = [];
+        $current = [];
+
+        foreach ($response as $line) {
+            if ($line === '!re') {
+                if (!empty($current)) {
+                    $profiles[] = $current;
+                    $current = [];
+                }
+            } elseif (str_starts_with($line, '=') && str_contains($line, '=')) {
+                $parts = explode('=', $line);
+                if (count($parts) >= 3) {
+                    $key = $parts[1];
+                    $value = $parts[2];
+                    $current[$key] = $value;
+                }
+            }
+        }
+
+        return $profiles;
+    }
+
+    public function updateHotspotServerProfile(string $id, array $data): array
+    {
+        $command = ['/ip/hotspot/profile/set', '.id=' . $id];
+        
+        foreach ($data as $key => $value) {
+            $command[] = '=' . $key . '=' . $value;
+        }
+
+        $this->write($command);
+        return $this->read();
+    }
+
+    // Login Page Design Methods
+    public function getHotspotLoginPage(): array
+    {
+        $this->write(['/ip/hotspot/walled-garden/print']);
+        $response = $this->read();
+
+        $pages = [];
+        $current = [];
+
+        foreach ($response as $line) {
+            if ($line === '!re') {
+                if (!empty($current)) {
+                    $pages[] = $current;
+                    $current = [];
+                }
+            } elseif (str_starts_with($line, '=') && str_contains($line, '=')) {
+                $parts = explode('=', $line);
+                if (count($parts) >= 3) {
+                    $key = $parts[1];
+                    $value = $parts[2];
+                    $current[$key] = $value;
+                }
+            }
+        }
+
+        return $pages;
+    }
+
+    public function setHotspotLoginPage(string $profileId, string $loginPage): array
+    {
+        $command = [
+            '/ip/hotspot/profile/set',
+            '.id=' . $profileId,
+            '=login-page=' . $loginPage
+        ];
+
+        $this->write($command);
+        return $this->read();
+    }
+
+    public function uploadHotspotFile(string $filename, string $content): array
+    {
+        // Note: File upload might need special handling depending on MikroTik version
+        $command = [
+            '/file/print',
+            '?name=' . $filename
+        ];
+
+        $this->write($command);
+        return $this->read();
+    }
+
     public function testRawResponse(): array
     {
         $this->write(['/ip/hotspot/user/print']);
+        return $this->read();
+    }
+
+    public function getSystemUsers(): array
+    {
+        $this->write(['/user/print']);
         $response = $this->read();
         
-        // Process and show what we get
+        Log::info('MikroTik System Users Raw Response:', ['response' => $response]);
+
         $users = [];
         $current = [];
-        
+
         foreach ($response as $index => $line) {
+            Log::info("Processing line {$index}: '{$line}'");
+            
             if ($line === '!re') {
                 if (!empty($current)) {
                     $users[] = $current;
+                    Log::info("Added user:", ['user' => $current]);
+                    $current = [];
                 }
-                $current = [];
             } elseif (str_starts_with($line, '=')) {
                 $equalPos = strpos($line, '=', 1);
                 if ($equalPos !== false) {
                     $key = substr($line, 1, $equalPos - 1);
                     $value = substr($line, $equalPos + 1);
                     $current[$key] = $value;
+                    Log::info("Parsed key-value:", ['key' => $key, 'value' => $value]);
                 }
             } elseif ($line === '!done') {
-                if (!empty($current)) {
-                    $users[] = $current;
-                }
+                Log::info("Command completed");
                 break;
             }
         }
-        
-        // If no !done found, add the last user
+
         if (!empty($current)) {
             $users[] = $current;
+            Log::info("Added final user:", ['user' => $current]);
         }
-        
-        // Debug: show processed users
-        foreach ($users as $i => $user) {
-            Log::info("Processed user {$i}:", $user);
-        }
-        
-        return $response;
+
+        Log::info('Final Processed System Users:', ['users' => $users, 'count' => count($users)]);
+        return $users;
     }
 
     // Low-level Mikrotik binary communication ↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
@@ -307,5 +451,13 @@ class MikrotikService
         elseif (($c & 0xF0) === 0xE0) return (($c & ~0xF0) << 24) + (ord(fread($this->socket, 1)) << 16) + (ord(fread($this->socket, 1)) << 8) + ord(fread($this->socket, 1));
         elseif (($c & 0xF8) === 0xF0) return (ord(fread($this->socket, 1)) << 24) + (ord(fread($this->socket, 1)) << 16) + (ord(fread($this->socket, 1)) << 8) + ord(fread($this->socket, 1));
         return 0;
+    }
+
+    public function disconnect(): void
+    {
+        if ($this->socket) {
+            fclose($this->socket);
+            $this->socket = null;
+        }
     }
 }

@@ -42,15 +42,17 @@ class HotspotController extends Controller
     {
         try {
             $users = $this->mikrotik->getHotspotUsers();
+            $systemUsers = $this->mikrotik->getSystemUsers();
             $profiles = $this->mikrotik->getHotspotProfiles();
             
             Log::info('Controller Users Count: ' . count($users));
+            Log::info('Controller System Users Count: ' . count($systemUsers));
             Log::info('Controller Profiles Count: ' . count($profiles));
             
-            return view('hotspot.users', compact('users', 'profiles'));
+            return view('hotspot.users', compact('users', 'systemUsers', 'profiles'));
         } catch (\Exception $e) {
             Log::error('Hotspot Users Error: ' . $e->getMessage());
-            return view('hotspot.users', ['users' => [], 'profiles' => []])
+            return view('hotspot.users', ['users' => [], 'systemUsers' => [], 'profiles' => []])
                 ->with('error', 'MikroTik connection failed: ' . $e->getMessage());
         }
     }
