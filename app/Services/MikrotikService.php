@@ -82,6 +82,161 @@ class MikrotikService
         return $this->read();
     }
 
+    public function getHotspotUsers(): array
+    {
+        $this->write(['/ip/hotspot/user/print']);
+        $response = $this->read();
+        
+        Log::info('MikroTik Hotspot Users Raw Response:', ['response' => $response]);
+
+        $users = [];
+        $current = [];
+
+        foreach ($response as $index => $line) {
+            Log::info("Processing line {$index}: '{$line}'");
+            
+            if ($line === '!re') {
+                // Start of new record - save previous if exists
+                if (!empty($current)) {
+                    $users[] = $current;
+                    Log::info("Added user:", ['user' => $current]);
+                }
+                $current = []; // Reset for new record
+            } elseif (str_starts_with($line, '=')) {
+                // More robust parsing - find the second = sign
+                $equalPos = strpos($line, '=', 1);
+                if ($equalPos !== false) {
+                    $key = substr($line, 1, $equalPos - 1);
+                    $value = substr($line, $equalPos + 1);
+                    $current[$key] = $value;
+                    Log::info("Parsed key-value:", ['key' => $key, 'value' => $value]);
+                }
+            } elseif ($line === '!done') {
+                // End of response - add last user if exists
+                if (!empty($current)) {
+                    $users[] = $current;
+                    Log::info("Added final user:", ['user' => $current]);
+                }
+                Log::info("Command completed");
+                break;
+            }
+        }
+
+        // If no !done found, add the last user anyway
+        if (!empty($current)) {
+            $users[] = $current;
+            Log::info("Added final user (no !done):", ['user' => $current]);
+        }
+
+        Log::info('Final Processed Hotspot Users:', ['users' => $users, 'count' => count($users)]);
+        return $users;
+    }
+
+    public function addHotspotUser(string $name, string $password, string $profile = 'default', ?string $comment = null): array
+    {
+        $command = [
+            '/ip/hotspot/user/add',
+            '=name=' . $name,
+            '=password=' . $password,
+            '=profile=' . $profile
+        ];
+
+        if ($comment) {
+            $command[] = '=comment=' . $comment;
+        }
+
+        $this->write($command);
+        return $this->read();
+    }
+
+    public function updateHotspotUser(string $id, array $data): array
+    {
+        $command = ['/ip/hotspot/user/set', '.id=' . $id];
+        
+        foreach ($data as $key => $value) {
+            $command[] = '=' . $key . '=' . $value;
+        }
+
+        $this->write($command);
+        return $this->read();
+    }
+
+    public function deleteHotspotUser(string $id): array
+    {
+        $this->write(['/ip/hotspot/user/remove', '.id=' . $id]);
+        return $this->read();
+    }
+
+    public function getHotspotProfiles(): array
+    {
+        $this->write(['/ip/hotspot/user/profile/print']);
+        $response = $this->read();
+
+        $profiles = [];
+        $current = [];
+
+        foreach ($response as $line) {
+            if ($line === '!re') {
+                if (!empty($current)) {
+                    $profiles[] = $current;
+                    $current = [];
+                }
+            } elseif (str_starts_with($line, '=') && str_contains($line, '=')) {
+                $parts = explode('=', $line);
+                if (count($parts) >= 3) {
+                    $key = $parts[1];
+                    $value = $parts[2];
+                    $current[$key] = $value;
+                }
+            }
+        }
+
+        return $profiles;
+    }
+
+    public function testRawResponse(): array
+    {
+        $this->write(['/ip/hotspot/user/print']);
+        $response = $this->read();
+        
+        // Process and show what we get
+        $users = [];
+        $current = [];
+        
+        foreach ($response as $index => $line) {
+            if ($line === '!re') {
+                if (!empty($current)) {
+                    $users[] = $current;
+                }
+                $current = [];
+            } elseif (str_starts_with($line, '=')) {
+                $equalPos = strpos($line, '=', 1);
+                if ($equalPos !== false) {
+                    $key = substr($line, 1, $equalPos - 1);
+                    $value = substr($line, $equalPos + 1);
+                    $current[$key] = $value;
+                }
+            } elseif ($line === '!done') {
+                if (!empty($current)) {
+                    $users[] = $current;
+                }
+                break;
+            }
+        }
+        
+        // If no !done found, add the last user
+        if (!empty($current)) {
+            $users[] = $current;
+        }
+        
+        // Debug: show processed users
+        foreach ($users as $i => $user) {
+            Log::info("Processed user {$i}:", $user);
+        }
+        
+        return $response;
+    }
+
     // Low-level Mikrotik binary communication ↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
 
     protected function write(array $words): void
@@ -102,6 +257,17 @@ class MikrotikService
             $response[] = fread($this->socket, $len);
         }
         return $response;
+    }
+
+    // Public methods for testing
+    public function writePublic(array $words): void
+    {
+        $this->write($words);
+    }
+
+    public function readPublic(): array
+    {
+        return $this->read();
     }
 
     protected function writeLength(int $len): void
