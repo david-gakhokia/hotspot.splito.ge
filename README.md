@@ -2,8 +2,13 @@
 
 > **ზე-თანამედროვე WiFi ავტენტიფიკაციის სისტემა Laravel 12 და MikroTik RouterOS-ით**
 
-[![Laravel 12](https://img.shields.io/badge/Laravel-12-ff2d20?style=for-the-badge&logo=laravel)](https://laravel.com)
-[![PHP](https://img.shields.io/badge/PHP-8.3+-777bb4?style=for-the-badge&logo=php)](https://php.net)
+[![Laravel 12](https://img.shields.io/badge/Laravel-12-ff2d20?style=for-the-badge&logo=laravel)](https://laravel.## 📚 დოკუმენტაცია
+
+დეტალური დოკუმენტაცია ხელმისაწვდომია:
+- **სისტემის დოკუმენტაცია**: `/docs/mikrotik-system`
+- **Troubleshooting Guide**: `/docs/troubleshooting` 🔍
+- **API Reference**: `/docs/api`
+- **Installation Guide**: `/docs/installation`[![PHP](https://img.shields.io/badge/PHP-8.3+-777bb4?style=for-the-badge&logo=php)](https://php.net)
 [![MikroTik](https://img.shields.io/badge/MikroTik-RouterOS-00a8ff?style=for-the-badge&logo=mikrotik)](https://mikrotik.com)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-CSS-38b2ac?style=for-the-badge&logo=tailwind-css)](https://tailwindcss.com)
 
@@ -167,7 +172,82 @@ add name=demo password=demo123 profile=default
 add name=guest password=guest123 profile=default
 ```
 
-## 📚 დოკუმენტაცია
+## � Troubleshooting (პრობლემების გადაჭრა)
+
+### Hotspot Login Redirection არ მუშაობს
+
+თუ მომხმარებლები მიერთდებიან WiFi-ზე მაგრამ არ ირთდება login გვერდი:
+
+#### 🧪 დიაგნოსტიკური კომანდები
+```bash
+# სრული დიაგნოსტიკა
+php artisan hotspot:diagnose
+
+# სწრაფი აღდგენა
+php artisan mikrotik:quick-fix
+```
+
+#### 🔧 ხელით კონფიგურაცია MikroTik Terminal-ში
+```bash
+# DNS კონფიგურაცია
+/ip dns set allow-remote-requests=yes servers=8.8.8.8,8.8.4.4
+/ip dns static add name="hotspot.local" address=192.168.88.1
+
+# NAT Rules HTTP redirect-ისთვის
+/ip firewall nat add chain=dstnat protocol=tcp dst-port=80 hotspot=auth action=redirect to-ports=8080
+/ip firewall nat add chain=dstnat protocol=tcp dst-port=443 hotspot=auth action=redirect to-ports=8080
+
+# Firewall filter Hotspot traffic-ისთვის
+/ip firewall filter add chain=input protocol=tcp dst-port=8080 action=accept
+
+# Walled Garden (თუ სჭირდება)
+/ip hotspot walled-garden add dst-host="*.splito.ge" action=allow
+/ip hotspot walled-garden add dst-host="hotspot.splito.ge.test" action=allow
+```
+
+#### ✅ ტესტირების ნაბიჯები
+1. **მოწყობილობის დაკავშირება** - WiFi-ზე დაუკავშირდი
+2. **Browser-ის გახსნა** - გახსენი ნებისმიერი საიტი (მაგ. google.com)
+3. **Redirect-ის შემოწმება** - უნდა გადამისამართდე MikroTik login-ზე
+4. **Login** - შიხვედი test/test123, demo/demo123 ან guest/guest123
+
+#### 🚨 ხშირი პრობლემები
+
+**პრობლემა:** "NO HOTSPOT SERVERS FOUND"
+```bash
+# გამოსავალი
+php artisan mikrotik:quick-fix
+# ან ხელით
+/ip hotspot add name=hotspot interface=bridge profile=default
+```
+
+**პრობლემა:** მიერთებული მომხმარებლები არ ირთდებიან
+```bash
+# შეამოწმე firewall rules
+/ip firewall nat print
+/ip firewall filter print
+
+# დაამატე NAT rule-ები თუ არ არის
+/ip firewall nat add chain=dstnat protocol=tcp dst-port=80 hotspot=auth action=redirect to-ports=8080
+```
+
+**პრობლემა:** DNS არ მუშაობს
+```bash
+# DNS სერვერების დაყენება
+/ip dns set allow-remote-requests=yes servers=8.8.8.8,8.8.4.4
+```
+
+### WiFi Configuration პრობლემები
+
+**CSRF Token Error:**
+- დარწმუნდი რომ `head.blade.php`-ში არის CSRF meta tag
+- Browser cache გაასუფთავე
+
+**Connection Timeout:**
+- შეამოწმე MikroTik IP მისამართი (default: 192.168.88.1)
+- დარწმუნდი რომ API გააქტიურებულია `/ip service set api disabled=no`
+
+## �📚 დოკუმენტაცია
 
 დეტალური დოკუმენტაცია ხელმისაწვდომია:
 - **სისტემის დოკუმენტაცია**: `/docs/mikrotik-system`

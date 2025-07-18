@@ -101,6 +101,10 @@ Route::get('/docs/mikrotik', function () {
     return view('docs.mikrotik-system');
 })->name('docs.mikrotik');
 
+Route::get('/docs/troubleshooting', function () {
+    return view('docs.troubleshooting');
+})->name('docs.troubleshooting');
+
 
 Route::view('dashboard', 'dashboard')
     ->middleware(['auth', 'verified'])
