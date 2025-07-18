@@ -11,6 +11,7 @@ class MikrotikService
     protected $port;
     protected $username;
     protected $password;
+    protected $connected = false;
 
     public function __construct()
     {
@@ -19,8 +20,56 @@ class MikrotikService
         $this->username = config('mikrotik.user');
         $this->password = config('mikrotik.pass');
 
-        $this->connect();
-        $this->login();
+        // Don't connect during package discovery, artisan list, or when no MikroTik config exists
+        if ($this->shouldConnect()) {
+            $this->connect();
+            $this->login();
+            $this->connected = true;
+        }
+    }
+
+    protected function ensureConnection(): void
+    {
+        if (!$this->connected) {
+            $this->connect();
+            $this->login();
+            $this->connected = true;
+        }
+    }
+
+    protected function shouldConnect(): bool
+    {
+        // Don't connect if credentials are missing
+        if (empty($this->username) || empty($this->password)) {
+            return false;
+        }
+
+        // Don't connect during package discovery
+        if (app()->runningInConsole()) {
+            $argv = $_SERVER['argv'] ?? [];
+            $command = implode(' ', $argv);
+            
+            // Skip connection for these commands
+            $skipCommands = [
+                'package:discover',
+                'config:cache',
+                'config:clear',
+                'list',
+                'help',
+                'route:cache',
+                'view:cache',
+                'optimize',
+                'migrate'
+            ];
+            
+            foreach ($skipCommands as $skipCommand) {
+                if (str_contains($command, $skipCommand)) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
     }
 
     public function __destruct()
@@ -51,6 +100,9 @@ class MikrotikService
 
     public function getActiveHotspotUsers(): array
     {
+
+        $this->ensureConnection();
+        $this->ensureConnection();
         $this->write(['/ip/hotspot/active/print']);
         $response = $this->read();
 
@@ -78,12 +130,16 @@ class MikrotikService
 
     public function kickUserById(string $id)
     {
+
+        $this->ensureConnection();
         $this->write(['/ip/hotspot/active/remove', '.id=' . $id]);
         return $this->read();
     }
 
     public function getHotspotUsers(): array
     {
+
+        $this->ensureConnection();
         $this->write(['/ip/hotspot/user/print']);
         $response = $this->read();
         
@@ -134,6 +190,8 @@ class MikrotikService
 
     public function addHotspotUser(string $name, string $password, string $profile = 'default', ?string $comment = null): array
     {
+
+        $this->ensureConnection();
         $command = [
             '/ip/hotspot/user/add',
             '=name=' . $name,
@@ -151,6 +209,8 @@ class MikrotikService
 
     public function updateHotspotUser(string $id, array $data): array
     {
+
+        $this->ensureConnection();
         $command = ['/ip/hotspot/user/set', '.id=' . $id];
         
         foreach ($data as $key => $value) {
@@ -163,12 +223,16 @@ class MikrotikService
 
     public function deleteHotspotUser(string $id): array
     {
+
+        $this->ensureConnection();
         $this->write(['/ip/hotspot/user/remove', '.id=' . $id]);
         return $this->read();
     }
 
     public function getHotspotProfiles(): array
     {
+
+        $this->ensureConnection();
         $this->write(['/ip/hotspot/user/profile/print']);
         $response = $this->read();
 
@@ -209,6 +273,7 @@ class MikrotikService
     // Hotspot Server Configuration Methods
     public function getHotspotServers(): array
     {
+        $this->ensureConnection();
         $this->write(['/ip/hotspot/print']);
         $response = $this->read();
 
@@ -236,6 +301,8 @@ class MikrotikService
 
     public function enableHotspotServer(string $interface, string $profile = 'default'): array
     {
+
+        $this->ensureConnection();
         $command = [
             '/ip/hotspot/add',
             '=name=' . $interface,
@@ -249,6 +316,8 @@ class MikrotikService
 
     public function disableHotspotServer(string $id): array
     {
+
+        $this->ensureConnection();
         $this->write(['/ip/hotspot/remove', '.id=' . $id]);
         return $this->read();
     }
@@ -256,6 +325,7 @@ class MikrotikService
     // Hotspot Server Profile Methods
     public function getHotspotServerProfiles(): array
     {
+        $this->ensureConnection();
         $this->write(['/ip/hotspot/profile/print']);
         $response = $this->read();
 
@@ -283,6 +353,8 @@ class MikrotikService
 
     public function updateHotspotServerProfile(string $id, array $data): array
     {
+
+        $this->ensureConnection();
         $command = ['/ip/hotspot/profile/set', '.id=' . $id];
         
         foreach ($data as $key => $value) {
@@ -296,6 +368,7 @@ class MikrotikService
     // Login Page Design Methods
     public function getHotspotLoginPage(): array
     {
+        $this->ensureConnection();
         $this->write(['/ip/hotspot/walled-garden/print']);
         $response = $this->read();
 
@@ -323,6 +396,8 @@ class MikrotikService
 
     public function setHotspotLoginPage(string $profileId, string $loginPage): array
     {
+
+        $this->ensureConnection();
         $command = [
             '/ip/hotspot/profile/set',
             '.id=' . $profileId,
@@ -335,6 +410,8 @@ class MikrotikService
 
     public function uploadHotspotFile(string $filename, string $content): array
     {
+
+        $this->ensureConnection();
         // Note: File upload might need special handling depending on MikroTik version
         $command = [
             '/file/print',
@@ -347,6 +424,8 @@ class MikrotikService
 
     public function getSystemIdentity(): array
     {
+
+        $this->ensureConnection();
         $this->write(['/system/identity/print']);
         $response = $this->read();
         return $this->parseResponse($response);
@@ -354,6 +433,8 @@ class MikrotikService
 
     public function getSystemResource(): array
     {
+
+        $this->ensureConnection();
         $this->write(['/system/resource/print']);
         $response = $this->read();
         return $this->parseResponse($response);
@@ -361,6 +442,8 @@ class MikrotikService
 
     public function getSystemRouterBoard(): array
     {
+
+        $this->ensureConnection();
         $this->write(['/system/routerboard/print']);
         $response = $this->read();
         return $this->parseResponse($response);
@@ -368,6 +451,8 @@ class MikrotikService
 
     public function getSystemClock(): array
     {
+
+        $this->ensureConnection();
         $this->write(['/system/clock/print']);
         $response = $this->read();
         return $this->parseResponse($response);
@@ -375,6 +460,8 @@ class MikrotikService
 
     public function getInterfaces(): array
     {
+
+        $this->ensureConnection();
         $this->write(['/interface/print']);
         $response = $this->read();
         return $this->parseResponse($response);
@@ -382,6 +469,8 @@ class MikrotikService
 
     public function getIpAddresses(): array
     {
+
+        $this->ensureConnection();
         $this->write(['/ip/address/print']);
         $response = $this->read();
         return $this->parseResponse($response);
@@ -435,12 +524,16 @@ class MikrotikService
 
     public function testRawResponse(): array
     {
+
+        $this->ensureConnection();
         $this->write(['/ip/hotspot/user/print']);
         return $this->read();
     }
 
     public function getSystemUsers(): array
     {
+
+        $this->ensureConnection();
         $this->write(['/user/print']);
         $response = $this->read();
         
@@ -506,11 +599,14 @@ class MikrotikService
     // Public methods for testing
     public function writePublic(array $words): void
     {
+        $this->ensureConnection();
         $this->write($words);
     }
 
     public function readPublic(): array
     {
+
+        $this->ensureConnection();
         return $this->read();
     }
 
@@ -555,6 +651,8 @@ class MikrotikService
 
     public function disconnect(): void
     {
+
+        $this->ensureConnection();
         if ($this->socket) {
             fclose($this->socket);
             $this->socket = null;
@@ -566,6 +664,7 @@ class MikrotikService
      */
     public function getWirelessInterfaces(): array
     {
+        $this->ensureConnection();
         $this->write(['/interface/wireless/print']);
         $response = $this->read();
 
@@ -600,6 +699,7 @@ class MikrotikService
      */
     public function updateWirelessSSID(string $interfaceName, string $ssid): array
     {
+        $this->ensureConnection();
         // Find interface by name
         $this->write(['/interface/wireless/print', '?name=' . $interfaceName]);
         $response = $this->read();
@@ -626,6 +726,7 @@ class MikrotikService
      */
     public function getWirelessSecurityProfiles(): array
     {
+        $this->ensureConnection();
         $this->write(['/interface/wireless/security-profiles/print']);
         $response = $this->read();
 
@@ -660,6 +761,7 @@ class MikrotikService
      */
     public function updateWirelessPassword(string $profileName, string $password): array
     {
+        $this->ensureConnection();
         // Find security profile by name
         $this->write(['/interface/wireless/security-profiles/print', '?name=' . $profileName]);
         $response = $this->read();
@@ -691,6 +793,7 @@ class MikrotikService
      */
     public function toggleWirelessInterface(string $interfaceName, bool $enable): array
     {
+        $this->ensureConnection();
         // Find interface by name
         $this->write(['/interface/wireless/print', '?name=' . $interfaceName]);
         $response = $this->read();
