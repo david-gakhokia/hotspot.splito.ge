@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>WiFi ავტორიზაცია - Splito</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); margin: 0; padding: 20px; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+        .container { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); max-width: 400px; width: 100%; }
+        .header { text-align: center; margin-bottom: 30px; }
+        .logo { font-size: 24px; font-weight: bold; color: #2563eb; margin-bottom: 10px; }
+        .subtitle { color: #64748b; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 5px; font-weight: 500; }
+        input[type="text"], input[type="password"] { width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 6px; font-size: 16px; }
+        input:focus { border-color: #2563eb; outline: none; }
+        .login-btn { width: 100%; padding: 14px; background: #2563eb; color: white; border: none; border-radius: 6px; font-size: 16px; font-weight: 600; cursor: pointer; }
+        .login-btn:hover { background: #1d4ed8; }
+        .info { margin-top: 20px; padding: 15px; background: #f8fafc; border-radius: 6px; font-size: 14px; color: #64748b; }
+        .error { background: #fef2f2; color: #dc2626; padding: 10px; border-radius: 6px; margin-bottom: 15px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">Splito</div>
+            <p class="subtitle">უფასო WiFi ინტერნეტი</p>
+        </div>
+        
+        $(if error)
+        <div class="error">$(error)</div>
+        $(endif)
+        
+        <form name="sendin" action="$(link-login-only)" method="post">
+            <input type="hidden" name="dst" value="$(link-orig)" />
+            <input type="hidden" name="popup" value="true" />
+            
+            <div class="form-group">
+                <label>მომხმარებლის სახელი</label>
+                <input type="text" name="username" value="$(username)" required>
+            </div>
+            
+            <div class="form-group">
+                <label>პაროლი</label>
+                <input type="password" name="password" required>
+            </div>
+            
+            <button type="submit" class="login-btn">შესვლა</button>
+        </form>
+        
+        <div class="info">
+            ⏱️ სესიის ხანგრძლივობა: 5 წუთი<br>
+            🌐 უფასო ინტერნეტი<br>
+            🎯 შესვლის შემდეგ გადამისამართება: splito.ge
+        </div>
+    </div>
+    
+    <script>
+        // Auto redirect after successful login
+        if (window.location.search.indexOf("login") === -1) {
+            setTimeout(function() {
+                window.location.href = "https://splito.ge";
+            }, 2000);
+        }
+    </script>
+</body>
+</html>

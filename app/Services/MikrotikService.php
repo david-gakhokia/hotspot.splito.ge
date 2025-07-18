@@ -819,4 +819,52 @@ class MikrotikService
 
         return $this->read();
     }
+
+    /**
+     * Execute raw MikroTik API command
+     */
+    public function executeCommand(array $command): array
+    {
+        $this->ensureConnection();
+        $this->write($command);
+        return $this->read();
+    }
+
+    /**
+     * Configure hotspot profile with custom settings
+     */
+    public function configureHotspotProfile(string $profile, array $settings): array
+    {
+        $this->ensureConnection();
+        
+        $command = ['/ip/hotspot/profile/set', "=.id={$profile}"];
+        foreach ($settings as $key => $value) {
+            $command[] = "={$key}={$value}";
+        }
+        
+        $this->write($command);
+        return $this->read();
+    }
+
+    /**
+     * Add walled garden rule
+     */
+    public function addWalledGardenRule(string $dstHost, string $action = 'allow', ?string $comment = null): array
+    {
+        $this->ensureConnection();
+        
+        $command = [
+            '/ip/hotspot/walled-garden/add',
+            '=disabled=no',
+            "=dst-host={$dstHost}",
+            "=action={$action}"
+        ];
+        
+        if ($comment) {
+            $command[] = "=comment={$comment}";
+        }
+        
+        $this->write($command);
+        return $this->read();
+    }
 }

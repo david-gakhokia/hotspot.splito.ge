@@ -1,0 +1,19 @@
+<!-- Simple SVG Logo for Splito -->
+<svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#2563eb;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1d4ed8;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background circle -->
+  <circle cx="20" cy="20" r="18" fill="url(#logoGradient)" stroke="white" stroke-width="2"/>
+  
+  <!-- Letter "S" -->
+  <path d="M 12 14 Q 12 10 16 10 L 24 10 Q 28 10 28 14 Q 28 17 24 17 L 16 17 Q 12 17 12 20 Q 12 24 16 24 L 24 24 Q 28 24 28 28 Q 28 30 24 30 L 16 30 Q 12 30 12 26" 
+        fill="none" 
+        stroke="white" 
+        stroke-width="2.5" 
+        stroke-linecap="round"/>
+</svg>

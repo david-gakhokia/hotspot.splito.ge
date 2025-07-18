@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>WiFi სტატუსი - Splito</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); margin: 0; padding: 20px; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+        .container { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); max-width: 400px; width: 100%; }
+        .header { text-align: center; margin-bottom: 30px; }
+        .logo { font-size: 24px; font-weight: bold; color: #2563eb; margin-bottom: 10px; }
+        .status-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #e2e8f0; }
+        .timer { font-size: 20px; font-weight: bold; color: #2563eb; text-align: center; padding: 20px; background: #f8fafc; margin: 15px 0; border-radius: 6px; }
+        .actions { margin-top: 20px; }
+        .btn { display: block; width: 100%; padding: 12px; margin: 10px 0; text-align: center; text-decoration: none; border-radius: 6px; font-weight: 600; }
+        .btn-primary { background: #2563eb; color: white; }
+        .btn-secondary { background: #e2e8f0; color: #64748b; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">Splito</div>
+            <p>კავშირი აქტიურია</p>
+        </div>
+        
+        <div class="timer" id="timer">5:00</div>
+        
+        <div class="status-item">
+            <span>მომხმარებელი:</span>
+            <span>$(username)</span>
+        </div>
+        <div class="status-item">
+            <span>IP მისამართი:</span>
+            <span>$(ip)</span>
+        </div>
+        <div class="status-item">
+            <span>სესიის დრო:</span>
+            <span>$(uptime)</span>
+        </div>
+        
+        <div class="actions">
+            <a href="https://splito.ge" class="btn btn-primary">🌐 Splito.ge-ზე გადასვლა</a>
+            <a href="$(link-logout)" class="btn btn-secondary">🚪 გამოსვლა</a>
+        </div>
+    </div>
+    
+    <script>
+        // Countdown timer
+        let time = 300;
+        function updateTimer() {
+            if (time > 0) {
+                const min = Math.floor(time / 60);
+                const sec = time % 60;
+                document.getElementById("timer").textContent = min + ":" + (sec < 10 ? "0" : "") + sec;
+                time--;
+                setTimeout(updateTimer, 1000);
+            }
+        }
+        updateTimer();
+        
+        // Auto redirect to splito.ge
+        setTimeout(function() {
+            window.location.href = "https://splito.ge";
+        }, 3000);
+    </script>
+</body>
+</html>
