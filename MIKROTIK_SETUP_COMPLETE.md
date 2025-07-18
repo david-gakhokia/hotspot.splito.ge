@@ -15,13 +15,15 @@ We have successfully created a comprehensive MikroTik hotspot management system 
 
 ### Backend Components
 ```
-Laravel 11 Framework
+Laravel 12 Framework
 ├── app/Services/MikrotikService.php          # Core MikroTik API service
 ├── app/Http/Controllers/MikrotikTestController.php  # Web interface controller
 ├── app/Console/Commands/
 │   ├── ConfigureMikrotik.php                 # Basic configuration
 │   ├── SetupMikrotikHotspot.php             # Comprehensive setup
-│   └── QuickSetupHotspot.php                # Simplified setup
+│   ├── QuickSetupHotspot.php                # Simplified setup
+│   └── TestMikrotik.php                      # Connection testing
+├── config/mikrotik.php                       # MikroTik configuration
 └── routes/web.php                           # API endpoints
 ```
 
@@ -30,7 +32,8 @@ Laravel 11 Framework
 resources/views/
 ├── mikrotik/dashboard.blade.php             # Main dashboard
 ├── test-api.blade.php                       # Interactive API tester
-└── realtime-dashboard.blade.php             # Live monitoring dashboard
+├── realtime-dashboard.blade.php             # Live monitoring dashboard
+└── docs/mikrotik-system.blade.php           # Complete documentation
 
 public/js/mikrotik-api.js                    # JavaScript API client
 ```
@@ -157,6 +160,7 @@ With Laravel Herd running on `https://hotspot.splito.ge.test/`:
 - **Main Dashboard**: https://hotspot.splito.ge.test/mikrotik/test
 - **Real-time Monitor**: https://hotspot.splito.ge.test/mikrotik/realtime
 - **API Tester**: https://hotspot.splito.ge.test/mikrotik/test-api
+- **Documentation**: https://hotspot.splito.ge.test/docs/mikrotik
 - **Users API**: https://hotspot.splito.ge.test/mikrotik/users
 - **Active Sessions**: https://hotspot.splito.ge.test/mikrotik/active
 

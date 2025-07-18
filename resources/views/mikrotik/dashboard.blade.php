@@ -111,15 +111,18 @@
                 
                 <!-- Interactive API Tester -->
                 <div class="mt-6 pt-6 border-t">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <a href="/mikrotik/test-api" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg inline-block text-center">
                             🧪 Interactive API Tester
                         </a>
                         <a href="/mikrotik/realtime" class="bg-green-500 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg inline-block text-center">
                             📊 Real-time Dashboard
                         </a>
+                        <a href="/docs/mikrotik" class="bg-purple-500 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg inline-block text-center">
+                            📖 დოკუმენტაცია
+                        </a>
                     </div>
-                    <p class="text-sm text-gray-600 mt-2">Test all endpoints with real-time responses, charts, and live monitoring.</p>
+                    <p class="text-sm text-gray-600 mt-2">Test all endpoints with real-time responses, charts, live monitoring და სრული დოკუმენტაცია.</p>
                 </div>
             </div>
         </main>

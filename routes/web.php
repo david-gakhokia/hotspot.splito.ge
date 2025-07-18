@@ -56,6 +56,11 @@ Route::get('/mikrotik/realtime', function () {
     return view('realtime-dashboard');
 })->name('mikrotik.realtime');
 
+// Documentation
+Route::get('/docs/mikrotik', function () {
+    return view('docs.mikrotik-system');
+})->name('docs.mikrotik');
+
 
 Route::view('dashboard', 'dashboard')
     ->middleware(['auth', 'verified'])
