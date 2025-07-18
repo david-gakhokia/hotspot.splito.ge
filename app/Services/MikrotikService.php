@@ -560,4 +560,160 @@ class MikrotikService
             $this->socket = null;
         }
     }
+
+    /**
+     * Get wireless interfaces configuration
+     */
+    public function getWirelessInterfaces(): array
+    {
+        $this->write(['/interface/wireless/print']);
+        $response = $this->read();
+
+        $interfaces = [];
+        $current = [];
+
+        foreach ($response as $line) {
+            if ($line === '!re') {
+                if (!empty($current)) {
+                    $interfaces[] = $current;
+                    $current = [];
+                }
+            } elseif (str_starts_with($line, '=') && str_contains($line, '=')) {
+                $parts = explode('=', $line);
+                if (count($parts) >= 3) {
+                    $key = $parts[1];
+                    $value = $parts[2];
+                    $current[$key] = $value;
+                }
+            }
+        }
+
+        if (!empty($current)) {
+            $interfaces[] = $current;
+        }
+
+        return $interfaces;
+    }
+
+    /**
+     * Update wireless interface SSID
+     */
+    public function updateWirelessSSID(string $interfaceName, string $ssid): array
+    {
+        // Find interface by name
+        $this->write(['/interface/wireless/print', '?name=' . $interfaceName]);
+        $response = $this->read();
+        
+        $interfaceId = null;
+        foreach ($response as $line) {
+            if (str_starts_with($line, '=.id=')) {
+                $interfaceId = substr($line, 5);
+                break;
+            }
+        }
+
+        if (!$interfaceId) {
+            throw new \Exception('Wireless interface not found: ' . $interfaceName);
+        }
+
+        // Update SSID
+        $this->write(['/interface/wireless/set', '=.id=' . $interfaceId, '=ssid=' . $ssid]);
+        return $this->read();
+    }
+
+    /**
+     * Get wireless security profiles
+     */
+    public function getWirelessSecurityProfiles(): array
+    {
+        $this->write(['/interface/wireless/security-profiles/print']);
+        $response = $this->read();
+
+        $profiles = [];
+        $current = [];
+
+        foreach ($response as $line) {
+            if ($line === '!re') {
+                if (!empty($current)) {
+                    $profiles[] = $current;
+                    $current = [];
+                }
+            } elseif (str_starts_with($line, '=') && str_contains($line, '=')) {
+                $parts = explode('=', $line);
+                if (count($parts) >= 3) {
+                    $key = $parts[1];
+                    $value = $parts[2];
+                    $current[$key] = $value;
+                }
+            }
+        }
+
+        if (!empty($current)) {
+            $profiles[] = $current;
+        }
+
+        return $profiles;
+    }
+
+    /**
+     * Update wireless security profile password
+     */
+    public function updateWirelessPassword(string $profileName, string $password): array
+    {
+        // Find security profile by name
+        $this->write(['/interface/wireless/security-profiles/print', '?name=' . $profileName]);
+        $response = $this->read();
+        
+        $profileId = null;
+        foreach ($response as $line) {
+            if (str_starts_with($line, '=.id=')) {
+                $profileId = substr($line, 5);
+                break;
+            }
+        }
+
+        if (!$profileId) {
+            throw new \Exception('Security profile not found: ' . $profileName);
+        }
+
+        // Update password
+        $this->write([
+            '/interface/wireless/security-profiles/set',
+            '=.id=' . $profileId,
+            '=wpa2-pre-shared-key=' . $password,
+            '=wpa-pre-shared-key=' . $password
+        ]);
+        return $this->read();
+    }
+
+    /**
+     * Enable/Disable wireless interface
+     */
+    public function toggleWirelessInterface(string $interfaceName, bool $enable): array
+    {
+        // Find interface by name
+        $this->write(['/interface/wireless/print', '?name=' . $interfaceName]);
+        $response = $this->read();
+        
+        $interfaceId = null;
+        foreach ($response as $line) {
+            if (str_starts_with($line, '=.id=')) {
+                $interfaceId = substr($line, 5);
+                break;
+            }
+        }
+
+        if (!$interfaceId) {
+            throw new \Exception('Wireless interface not found: ' . $interfaceName);
+        }
+
+        // Enable or disable interface
+        if ($enable) {
+            $this->write(['/interface/wireless/enable', '=.id=' . $interfaceId]);
+        } else {
+            $this->write(['/interface/wireless/disable', '=.id=' . $interfaceId]);
+        }
+
+        return $this->read();
+    }
 }

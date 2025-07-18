@@ -7,6 +7,7 @@ use App\Http\Controllers\HotspotServerController;
 use App\Http\Controllers\LoginPageDesignerController;
 use App\Http\Controllers\MikrotikTestController;
 use App\Http\Controllers\HotspotAuthController;
+use App\Http\Controllers\WiFiConfigController;
 
 
 Route::get('/', function () {
@@ -24,6 +25,32 @@ Route::get('/hotspot/status', [HotspotAuthController::class, 'status'])->name('h
 Route::get('/hotspot/management', function () {
     return view('hotspot.management');
 })->name('hotspot.management');
+
+// WiFi Configuration Routes
+Route::get('/api/wifi/config', [WiFiConfigController::class, 'getWiFiConfig'])->name('wifi.config');
+Route::post('/api/wifi/update-ssid', [WiFiConfigController::class, 'updateSSID'])->name('wifi.update-ssid');
+Route::post('/api/wifi/update-password', [WiFiConfigController::class, 'updatePassword'])->name('wifi.update-password');
+Route::get('/api/wifi/security-profiles', [WiFiConfigController::class, 'getSecurityProfiles'])->name('wifi.security-profiles');
+Route::post('/api/wifi/toggle', [WiFiConfigController::class, 'toggleWiFi'])->name('wifi.toggle');
+
+// Test WiFi endpoint
+Route::get('/test-wifi', function () {
+    try {
+        $mikrotik = app(\App\Services\MikrotikService::class);
+        $interfaces = $mikrotik->getWirelessInterfaces();
+        return response()->json([
+            'success' => true,
+            'interfaces' => $interfaces,
+            'count' => count($interfaces)
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString()
+        ]);
+    }
+});
 
 
 
