@@ -44,9 +44,9 @@
                 </div>
                 
                 <div class="bg-white rounded-lg shadow-md p-6">
-                    <h3 class="text-lg font-semibold mb-2">⚙️ Configuration</h3>
-                    <p class="text-sm text-gray-600">Network Settings</p>
-                    <a href="/mikrotik/config" class="text-blue-500 hover:underline">Configure →</a>
+                    <h3 class="text-lg font-semibold mb-2">🚪 Login Portal</h3>
+                    <p class="text-sm text-gray-600">WiFi Authentication</p>
+                    <a href="/hotspot/login" class="text-blue-500 hover:underline">Access →</a>
                 </div>
             </div>
 
@@ -111,18 +111,21 @@
                 
                 <!-- Interactive API Tester -->
                 <div class="mt-6 pt-6 border-t">
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                         <a href="/mikrotik/test-api" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg inline-block text-center">
                             🧪 Interactive API Tester
                         </a>
                         <a href="/mikrotik/realtime" class="bg-green-500 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg inline-block text-center">
                             📊 Real-time Dashboard
                         </a>
+                        <a href="/hotspot/management" class="bg-orange-500 hover:bg-orange-700 text-white font-bold py-3 px-6 rounded-lg inline-block text-center">
+                            🔥 Hotspot Management
+                        </a>
                         <a href="/docs/mikrotik" class="bg-purple-500 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg inline-block text-center">
                             📖 დოკუმენტაცია
                         </a>
                     </div>
-                    <p class="text-sm text-gray-600 mt-2">Test all endpoints with real-time responses, charts, live monitoring და სრული დოკუმენტაცია.</p>
+                    <p class="text-sm text-gray-600 mt-2">Test all endpoints with real-time responses, charts, live monitoring, WiFi management და სრული დოკუმენტაცია.</p>
                 </div>
             </div>
         </main>

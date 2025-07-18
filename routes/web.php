@@ -6,11 +6,24 @@ use App\Http\Controllers\HotspotController;
 use App\Http\Controllers\HotspotServerController;
 use App\Http\Controllers\LoginPageDesignerController;
 use App\Http\Controllers\MikrotikTestController;
+use App\Http\Controllers\HotspotAuthController;
 
 
 Route::get('/', function () {
     return view('welcome');
 })->name('home');
+
+// Hotspot Authentication Routes
+Route::get('/hotspot/login', [HotspotAuthController::class, 'loginPage'])->name('hotspot.login');
+Route::post('/hotspot/authenticate', [HotspotAuthController::class, 'authenticate'])->name('hotspot.authenticate');
+Route::get('/hotspot/welcome', [HotspotAuthController::class, 'welcome'])->name('hotspot.welcome');
+Route::post('/hotspot/logout', [HotspotAuthController::class, 'logout'])->name('hotspot.logout');
+Route::get('/hotspot/status', [HotspotAuthController::class, 'status'])->name('hotspot.status');
+
+// Hotspot Management
+Route::get('/hotspot/management', function () {
+    return view('hotspot.management');
+})->name('hotspot.management');
 
 
 
