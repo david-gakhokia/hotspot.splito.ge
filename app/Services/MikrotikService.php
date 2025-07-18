@@ -172,6 +172,8 @@ class MikrotikService
         $this->write(['/ip/hotspot/user/profile/print']);
         $response = $this->read();
 
+        Log::info('MikroTik Hotspot Profiles Raw Response:', ['response' => $response]);
+
         $profiles = [];
         $current = [];
 
@@ -179,18 +181,28 @@ class MikrotikService
             if ($line === '!re') {
                 if (!empty($current)) {
                     $profiles[] = $current;
-                    $current = [];
+                    Log::info("Added profile:", ['profile' => $current]);
                 }
-            } elseif (str_starts_with($line, '=') && str_contains($line, '=')) {
-                $parts = explode('=', $line);
-                if (count($parts) >= 3) {
-                    $key = $parts[1];
-                    $value = $parts[2];
+                $current = [];
+            } elseif (str_starts_with($line, '=')) {
+                // More robust parsing - find the second = sign
+                $equalPos = strpos($line, '=', 1);
+                if ($equalPos !== false) {
+                    $key = substr($line, 1, $equalPos - 1);
+                    $value = substr($line, $equalPos + 1);
                     $current[$key] = $value;
+                    Log::info("Parsed key-value:", ['key' => $key, 'value' => $value]);
                 }
+            } elseif ($line === '!done') {
+                if (!empty($current)) {
+                    $profiles[] = $current;
+                    Log::info("Added final profile:", ['profile' => $current]);
+                }
+                break;
             }
         }
 
+        Log::info('Final Processed Hotspot Profiles:', ['profiles' => $profiles, 'count' => count($profiles)]);
         return $profiles;
     }
 
@@ -331,6 +343,94 @@ class MikrotikService
 
         $this->write($command);
         return $this->read();
+    }
+
+    public function getSystemIdentity(): array
+    {
+        $this->write(['/system/identity/print']);
+        $response = $this->read();
+        return $this->parseResponse($response);
+    }
+
+    public function getSystemResource(): array
+    {
+        $this->write(['/system/resource/print']);
+        $response = $this->read();
+        return $this->parseResponse($response);
+    }
+
+    public function getSystemRouterBoard(): array
+    {
+        $this->write(['/system/routerboard/print']);
+        $response = $this->read();
+        return $this->parseResponse($response);
+    }
+
+    public function getSystemClock(): array
+    {
+        $this->write(['/system/clock/print']);
+        $response = $this->read();
+        return $this->parseResponse($response);
+    }
+
+    public function getInterfaces(): array
+    {
+        $this->write(['/interface/print']);
+        $response = $this->read();
+        return $this->parseResponse($response);
+    }
+
+    public function getIpAddresses(): array
+    {
+        $this->write(['/ip/address/print']);
+        $response = $this->read();
+        return $this->parseResponse($response);
+    }
+
+    private function parseResponse(array $response): array
+    {
+        $result = [];
+        $current = [];
+
+        Log::info('Parsing response:', ['response' => $response]);
+
+        foreach ($response as $line) {
+            Log::info('Processing line:', ['line' => $line]);
+            
+            if ($line === '!re') {
+                // Start of new record - save previous if exists
+                if (!empty($current)) {
+                    $result[] = $current;
+                    Log::info('Added record:', ['record' => $current]);
+                }
+                $current = [];
+            } elseif (str_starts_with($line, '=')) {
+                // Find the second = sign
+                $equalPos = strpos($line, '=', 1);
+                if ($equalPos !== false) {
+                    $key = substr($line, 1, $equalPos - 1);
+                    $value = substr($line, $equalPos + 1);
+                    $current[$key] = $value;
+                    Log::info('Set key-value:', ['key' => $key, 'value' => $value]);
+                }
+            } elseif ($line === '!done') {
+                // End of response - add last record if exists
+                if (!empty($current)) {
+                    $result[] = $current;
+                    Log::info('Added final record:', ['record' => $current]);
+                }
+                break;
+            }
+        }
+
+        // If no !done found, add the last record anyway
+        if (!empty($current)) {
+            $result[] = $current;
+            Log::info('Added remaining record:', ['record' => $current]);
+        }
+
+        Log::info('Final parsed result:', ['result' => $result, 'count' => count($result)]);
+        return $result;
     }
 
     public function testRawResponse(): array

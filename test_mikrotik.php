@@ -2,6 +2,9 @@
 
 require_once 'vendor/autoload.php';
 
+// Bootstrap Laravel application
+$app = require_once 'bootstrap/app.php';
+
 use App\Services\MikrotikService;
 
 // Test MikroTik connection
