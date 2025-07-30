@@ -10,6 +10,10 @@ use App\Http\Controllers\HotspotAuthController;
 use App\Http\Controllers\WiFiConfigController;
 use App\Http\Controllers\MikrotikFileController;
 
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
+
+
 
 Route::get('/', function () {
     return view('welcome');
@@ -21,11 +25,31 @@ Route::get('/test-hotspot', function () {
 })->name('test.hotspot');
 
 // Hotspot Authentication Routes
-Route::get('/hotspot/login', [HotspotAuthController::class, 'loginPage'])->name('hotspot.login');
+// Route::get('/hotspot/login', [HotspotAuthController::class, 'loginPage'])->name('hotspot.login');
 Route::post('/hotspot/authenticate', [HotspotAuthController::class, 'authenticate'])->name('hotspot.authenticate');
 Route::get('/hotspot/welcome', [HotspotAuthController::class, 'welcome'])->name('hotspot.welcome');
 Route::post('/hotspot/logout', [HotspotAuthController::class, 'logout'])->name('hotspot.logout');
 Route::get('/hotspot/status', [HotspotAuthController::class, 'status'])->name('hotspot.status');
+
+
+// Inline Hotspot Login Routes
+Route::get('/hotspot/login', function (Request $request) {
+    return view('hotspot.login', [
+        'params' => $request->all()
+    ]);
+});
+
+Route::post('/hotspot/login', function (Request $request) {
+    $response = Http::asForm()->post($request->input('login_url'), [
+        'username' => $request->input('username'),
+        'password' => $request->input('password'),
+    ]);
+
+    return redirect($request->input('link_orig') ?? 'https://invest.mardi.ge/offer');
+});
+
+
+
 
 // Hotspot Management
 Route::get('/hotspot/management', function () {
