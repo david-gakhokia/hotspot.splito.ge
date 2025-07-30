@@ -1,3 +1,4 @@
+
 <?php
 
 use Illuminate\Support\Facades\Route;
@@ -9,6 +10,8 @@ use App\Http\Controllers\MikrotikTestController;
 use App\Http\Controllers\HotspotAuthController;
 use App\Http\Controllers\WiFiConfigController;
 use App\Http\Controllers\MikrotikFileController;
+use App\Http\Controllers\HotspotUserController;
+
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
@@ -49,7 +52,13 @@ Route::post('/hotspot/login', function (Request $request) {
 });
 
 
-
+// Hotspot Users Resource Routes
+Route::get('/hotspot/users', [HotspotUserController::class, 'index'])->name('hotspot.users');
+Route::get('/hotspot/users/create', [HotspotUserController::class, 'create'])->name('hotspot.users.create');
+Route::get('/hotspot/users/{id}/edit', [HotspotUserController::class, 'edit'])->name('hotspot.users.edit');
+Route::post('/hotspot/users', [HotspotUserController::class, 'store'])->name('hotspot.users.store');
+Route::put('/hotspot/users/{id}', [HotspotUserController::class, 'update'])->name('hotspot.users.update');
+Route::delete('/hotspot/users/{id}', [HotspotUserController::class, 'destroy'])->name('hotspot.users.delete');
 
 // Hotspot Management
 Route::get('/hotspot/management', function () {
