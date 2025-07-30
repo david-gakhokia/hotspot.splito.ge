@@ -39,7 +39,7 @@ class HotspotUserController extends Controller
     // Show edit form
     public function edit($id)
     {
-        $user = (array) \DB::table('hotspot_users')->where('id', $id)->first();
+        $user = (array) DB::table('hotspot_users')->where('id', $id)->first();
         if (!$user) {
             return redirect()->route('hotspot.users')->with('error', 'User not found!');
         }
