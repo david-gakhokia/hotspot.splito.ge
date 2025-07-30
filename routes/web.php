@@ -8,11 +8,17 @@ use App\Http\Controllers\LoginPageDesignerController;
 use App\Http\Controllers\MikrotikTestController;
 use App\Http\Controllers\HotspotAuthController;
 use App\Http\Controllers\WiFiConfigController;
+use App\Http\Controllers\MikrotikFileController;
 
 
 Route::get('/', function () {
     return view('welcome');
 })->name('home');
+
+// Hotspot Test Route
+Route::get('/test-hotspot', function () {
+    return response()->file(public_path('test-hotspot.html'));
+})->name('test.hotspot');
 
 // Hotspot Authentication Routes
 Route::get('/hotspot/login', [HotspotAuthController::class, 'loginPage'])->name('hotspot.login');
@@ -80,6 +86,17 @@ Route::get('/mikrotik/test', [MikrotikTestController::class, 'index'])->name('mi
 Route::post('/mikrotik/test-connection', [MikrotikTestController::class, 'testConnection'])->name('mikrotik.test.connection');
 Route::get('/mikrotik/system-info', [MikrotikTestController::class, 'getSystemInfo'])->name('mikrotik.test.system-info');
 Route::get('/mikrotik/device-info', [MikrotikTestController::class, 'getDeviceInfo'])->name('mikrotik.test.device-info');
+
+// MikroTik File Management Routes
+Route::prefix('mikrotik/files')->name('mikrotik.files.')->group(function () {
+    Route::get('/', [MikrotikFileController::class, 'index'])->name('index');
+    Route::post('/upload', [MikrotikFileController::class, 'upload'])->name('upload');
+    Route::post('/download', [MikrotikFileController::class, 'download'])->name('download');
+    Route::delete('/delete', [MikrotikFileController::class, 'delete'])->name('delete');
+    Route::post('/upload-hotspot', [MikrotikFileController::class, 'uploadHotspotFiles'])->name('upload-hotspot');
+    Route::post('/test-connection', [MikrotikFileController::class, 'testConnection'])->name('test-connection');
+    Route::post('/file-info', [MikrotikFileController::class, 'fileInfo'])->name('file-info');
+});
 
 // MikroTik API Endpoints
 Route::get('/mikrotik/api', [MikrotikTestController::class, 'api'])->name('mikrotik.api');

@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hotspot Login Test - Splito</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-link {
+            display: inline-block;
+            background: #2563eb;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 10px 10px 10px 0;
+        }
+        .test-link:hover {
+            background: #1d4ed8;
+        }
+        .feature-list {
+            list-style-type: none;
+            padding: 0;
+        }
+        .feature-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .feature-list li:before {
+            content: "✅ ";
+            color: #059669;
+        }
+    </style>
+</head>
+<body>
+    <h1>🚀 Splito Hotspot - განახლებული ვერსია</h1>
+    
+    <div class="test-section">
+        <h2>ახალი ფუნქციონალი</h2>
+        <ul class="feature-list">
+            <li>Tower Group რეკლამის ბანერი (top banner)</li>
+            <li>სწრაფი შესვლის ღილაკები (სტუმარი / უფასო WiFi)</li>
+            <li>ავტომატური ინტერნეტის ჩართვა checkbox</li>
+            <li>Auto-connect ფლოუ Tower Group modal-ით</li>
+            <li>Analytics tracking (Google Analytics მზაださい)</li>
+            <li>Mobile responsive დიზაინი</li>
+            <li>LocalStorage პრეფერენციებისთვის</li>
+        </ul>
+    </div>
+
+    <div class="test-section">
+        <h2>ტესტირება</h2>
+        <p>დააჭირეთ ქვემოთ მოცემულ ლინკებს hotspot ფუნქციონალის ტესტირებისთვის:</p>
+        
+        <a href="hotspot/login.html" class="test-link" target="_blank">
+            🔐 Login გვერდი
+        </a>
+        
+        <a href="hotspot/login.html?username=guest" class="test-link" target="_blank">
+            👤 სტუმარი Login
+        </a>
+        
+        <a href="hotspot/status.html" class="test-link" target="_blank">
+            📊 Status გვერდი
+        </a>
+        
+        <a href="hotspot/logout.html" class="test-link" target="_blank">
+            🚪 Logout გვერდი
+        </a>
+    </div>
+
+    <div class="test-section">
+        <h2>როგორ მუშაობს</h2>
+        <ol>
+            <li><strong>რეკლამა</strong>: ზედა ბანერზე კლიკით იხსნება Tower Group საიტი</li>
+            <li><strong>სწრაფი შესვლა</strong>: 
+                <ul>
+                    <li>სტუმარი - username: "guest", password: ""</li>
+                    <li>უფასო WiFi - username: "free", password: "wifi"</li>
+                </ul>
+            </li>
+            <li><strong>ავტომატური კავშირი</strong>: checkbox ჩართვის შემთხვევაში:
+                <ul>
+                    <li>Login-ის შემდეგ ჩნდება Tower Group modal 5 წამით</li>
+                    <li>შემდეგ გადაამისამართებს splito.ge-ზე</li>
+                </ul>
+            </li>
+            <li><strong>Analytics</strong>: ყველა მოქმედება ფიქსირდება tracking-ისთვის</li>
+        </ol>
+    </div>
+
+    <div class="test-section">
+        <h2>MikroTik-ში განლაგება</h2>
+        <p>ფაილები უნდა აიტვირთოს MikroTik RouterOS-ის Files სექციაში:</p>
+        <pre style="background: #f8f8f8; padding: 10px; border-radius: 5px; overflow-x: auto;">
+hotspot/
+├── login.html
+├── css/styles.css  
+├── js/app.js
+└── images/
+    ├── logo.png
+    ├── tower-group-banner.jpg
+    └── tower-group-modal.jpg
+        </pre>
+    </div>
+
+    <div class="test-section">
+        <h2>📝 შენიშვნები</h2>
+        <ul>
+            <li>Tower Group სურათები ჯერ placeholder-ია - შეანაცვლეთ რეალურებით</li>
+            <li>Domain "towergroup.ge" შეცვალეთ რეალურით</li>
+            <li>Google Analytics ID დაამატეთ GA_TRACKING_ID-ს ნაცვლად</li>
+            <li>MikroTik walled garden-ში დაამატეთ tower group domain</li>
+        </ul>
+    </div>
+
+    <script>
+        console.log('🚀 Splito Hotspot Test Page Loaded');
+        console.log('✅ Files ready for MikroTik deployment');
+    </script>
+</body>
+</html>

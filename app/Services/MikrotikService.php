@@ -22,7 +22,7 @@ class MikrotikService
 
         // Don't connect during package discovery, artisan list, or when no MikroTik config exists
         if ($this->shouldConnect()) {
-            $this->connect();
+            $this->connectSocket();
             $this->login();
             $this->connected = true;
         }
@@ -31,7 +31,7 @@ class MikrotikService
     protected function ensureConnection(): void
     {
         if (!$this->connected) {
-            $this->connect();
+            $this->connectSocket();
             $this->login();
             $this->connected = true;
         }
@@ -79,7 +79,7 @@ class MikrotikService
         }
     }
 
-    protected function connect()
+    protected function connectSocket()
     {
         $this->socket = fsockopen($this->host, $this->port, $errno, $errstr, 3);
         if (!$this->socket) {
@@ -410,7 +410,6 @@ class MikrotikService
 
     public function uploadHotspotFile(string $filename, string $content): array
     {
-
         $this->ensureConnection();
         // Note: File upload might need special handling depending on MikroTik version
         $command = [
@@ -420,6 +419,144 @@ class MikrotikService
 
         $this->write($command);
         return $this->read();
+    }
+
+    /**
+     * Get list of files in MikroTik filesystem
+     */
+    public function getFileList(string $directory = null): array
+    {
+        $this->ensureConnection();
+        
+        $command = ['/file/print'];
+        if ($directory) {
+            $command[] = '?name=' . $directory . '/*';
+        }
+        
+        $this->write($command);
+        $response = $this->read();
+        
+        Log::info('MikroTik File List Response:', ['response' => $response]);
+        
+        $files = [];
+        $current = [];
+
+        foreach ($response as $index => $line) {
+            if ($line === '!re') {
+                if (!empty($current)) {
+                    $files[] = $current;
+                }
+                $current = [];
+            } elseif (str_starts_with($line, '=')) {
+                $equalPos = strpos($line, '=', 1);
+                if ($equalPos !== false) {
+                    $key = substr($line, 1, $equalPos - 1);
+                    $value = substr($line, $equalPos + 1);
+                    $current[$key] = $value;
+                }
+            } elseif ($line === '!done') {
+                if (!empty($current)) {
+                    $files[] = $current;
+                }
+                break;
+            }
+        }
+
+        Log::info('Processed Files:', ['files' => $files, 'count' => count($files)]);
+        return $files;
+    }
+
+    /**
+     * Get hotspot directory files
+     */
+    public function getHotspotFiles(): array
+    {
+        return $this->getFileList('hotspot');
+    }
+
+    /**
+     * Remove file from MikroTik
+     */
+    public function removeFile(string $filename): array
+    {
+        $this->ensureConnection();
+        
+        $command = [
+            '/file/remove',
+            '=numbers=' . $filename
+        ];
+        
+        $this->write($command);
+        return $this->read();
+    }
+
+    /**
+     * Create directory on MikroTik
+     */
+    public function createDirectory(string $dirname): array
+    {
+        $this->ensureConnection();
+        
+        // First check if directory exists
+        $files = $this->getFileList();
+        foreach ($files as $file) {
+            if (isset($file['name']) && $file['name'] === $dirname && isset($file['type']) && $file['type'] === 'directory') {
+                Log::info('Directory already exists:', ['dir' => $dirname]);
+                return ['status' => 'exists'];
+            }
+        }
+        
+        // Create directory using file command
+        $command = [
+            '/file/add',
+            '=name=' . $dirname,
+            '=type=directory'
+        ];
+        
+        $this->write($command);
+        return $this->read();
+    }
+
+    /**
+     * Get file information
+     */
+    public function getFileInfo(string $filename): array
+    {
+        $this->ensureConnection();
+        
+        $command = [
+            '/file/print',
+            '?name=' . $filename
+        ];
+        
+        $this->write($command);
+        $response = $this->read();
+        
+        $files = [];
+        $current = [];
+
+        foreach ($response as $line) {
+            if ($line === '!re') {
+                if (!empty($current)) {
+                    $files[] = $current;
+                }
+                $current = [];
+            } elseif (str_starts_with($line, '=')) {
+                $equalPos = strpos($line, '=', 1);
+                if ($equalPos !== false) {
+                    $key = substr($line, 1, $equalPos - 1);
+                    $value = substr($line, $equalPos + 1);
+                    $current[$key] = $value;
+                }
+            } elseif ($line === '!done') {
+                if (!empty($current)) {
+                    $files[] = $current;
+                }
+                break;
+            }
+        }
+
+        return !empty($files) ? $files[0] : [];
     }
 
     public function getSystemIdentity(): array
@@ -608,6 +745,44 @@ class MikrotikService
 
         $this->ensureConnection();
         return $this->read();
+    }
+
+    /**
+     * Execute a MikroTik API query
+     */
+    public function query(string $command, array $arguments = []): array
+    {
+        $this->ensureConnection();
+        
+        $query = [$command];
+        foreach ($arguments as $key => $value) {
+            if (is_numeric($key)) {
+                $query[] = $value;
+            } else {
+                $query[] = "={$key}={$value}";
+            }
+        }
+        
+        $this->write($query);
+        return $this->read();
+    }
+
+    /**
+     * Public connect method for testing
+     */
+    public function connect(): bool
+    {
+        try {
+            if (!$this->socket) {
+                $this->connectSocket();
+                $this->login();
+                $this->connected = true;
+            }
+            return true;
+        } catch (\Exception $e) {
+            Log::error("MikroTik connection failed: " . $e->getMessage());
+            return false;
+        }
     }
 
     protected function writeLength(int $len): void
