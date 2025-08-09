@@ -17,6 +17,19 @@ class HotspotUserController extends Controller
         return view('hotspot.users', compact('users'));
     }
 
+    public function offer()
+    {
+    
+        return view('hotspot.offer');
+    }
+
+    public function home()
+    {
+    
+        return view('hotspot.home');
+    }
+
+
     // Show create form
     public function create()
     {

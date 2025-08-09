@@ -51,6 +51,9 @@ Route::post('/hotspot/login', function (Request $request) {
     return redirect($request->input('link_orig') ?? 'https://invest.mardi.ge/offer');
 });
 
+Route::get('/hotspot/home', [HotspotUserController::class, 'home'])->name('hotspot.home');
+Route::get('/hotspot/offer', [HotspotUserController::class, 'offer'])->name('hotspot.offer');
+
 
 // Hotspot Users Resource Routes
 Route::get('/hotspot/users', [HotspotUserController::class, 'index'])->name('hotspot.users');
