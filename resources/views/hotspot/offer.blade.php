@@ -115,7 +115,7 @@
 </head>
 <body>
   <div class="title-section">
-    <h1>Apartments in Batumi for investment</h1>
+    {{-- <h1>Apartments in Batumi for investment</h1> --}}
   </div>
 
   <div class="wrap">
