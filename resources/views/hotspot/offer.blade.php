@@ -1,11 +1,10 @@
 <!DOCTYPE html>
 <html lang="ka">
-
 <head>
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Free Wi‑Fi Offer</title>
+    <title>Hotspot Offer Test Page</title>
     <style>
         :root {
             --blue: #2563eb;
@@ -131,20 +130,24 @@
         }
     </style>
     <script>
-        // Trial login function to connect users to the internet via hotspot
-        function connectWifi() {
-            // ამ მისამართში ჩაწერე შენი Hotspot-ის IP და სასურველი გადასვლის გვერდი
-            var routerIP = "192.168.100.1";
-            var dst = encodeURIComponent("https://google.com"); // ინტერნეტში გადასვლის შემდეგ სად წავიდეს
-            window.location.href = "http://" + routerIP + "/login?username=&password=&dst=" + dst;
+        // Trigger trial login to the Mikrotik hotspot. Adjust URL as needed.
+        function connectInternet() {
+            // Replace with your router's hotspot IP and desired redirect
+            var hotspotLoginUrl = 'http://192.168.100.1/login?username=&password=&dst=https://google.com';
+            var img = new Image();
+            img.src = hotspotLoginUrl;
+            // After a short delay, forward user to the chosen landing page
+            setTimeout(function() {
+                window.location.href = 'https://google.com';
+            }, 3000);
         }
     </script>
 </head>
-
 <body>
-    <div class="title-section">
-        {{-- <h1>Apartments in Batumi for investment</h1> --}}
-    </div>
+    <!-- Display the original offer page inside an iframe. Note that the remote site must allow framing -->
+    
+
+
 
     <div class="wrap">
         <div class="card">
@@ -161,6 +164,9 @@
             </div>
         </div>
     </div>
-</body>
 
+    <div class="controls">
+        <button onclick="connectInternet()">გაუქმება / ინტერნეტის ჩართვა</button>
+    </div>
+</body>
 </html>
