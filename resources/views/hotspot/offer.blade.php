@@ -1,172 +1,125 @@
-<!DOCTYPE html>
-<html lang="ka">
+<!doctype html>
+<html lang="en">
+
 <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta charset="utf-8">
+    <meta http-equiv="pragma" content="no-cache" />
+    <meta http-equiv="expires" content="-1" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Hotspot Offer Test Page</title>
-    <style>
-        :root {
-            --blue: #2563eb;
-            --blue-hover: #1d4ed8;
-            --green: #10b981;
-            --green-hover: #059669;
-            --card-shadow: 0 6px 18px rgba(0, 0, 0, .12);
-            --radius: 14px;
-        }
+    <title>Internet hotspot - Log in</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
 
-        * {
-            box-sizing: border-box
-        }
+<body>
+    <!-- two other colors
+  <body class="lite">
+  <body class="dark">
+  -->
 
-        body,
-        html {
-            height: 100%;
-            margin: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
-            color: #111827;
-            background: #f7f7fb;
-        }
+    $(if chap-id)
+    <form name="sendin" action="$(link-login-only)" method="post" style="display:none">
+        <input type="hidden" name="username" />
+        <input type="hidden" name="password" />
+        <input type="hidden" name="dst" value="$(link-orig)" />
+        <input type="hidden" name="popup" value="true" />
+    </form>
 
-        .title-section {
-            text-align: center;
-            padding: 28px 16px 12px;
-        }
-
-        .title-section h1 {
-            margin: 0;
-            font-size: clamp(22px, 3vw, 32px);
-            font-weight: 800;
-            letter-spacing: .2px;
-        }
-
-        .wrap {
-            max-width: 960px;
-            margin: 0 auto;
-            padding: 0 16px 22px;
-        }
-
-        .card {
-            background: #fff;
-            border-radius: var(--radius);
-            box-shadow: var(--card-shadow);
-            overflow: hidden;
-        }
-
-        .media {
-            display: block;
-            width: 100%;
-            height: 540px;
-            /* Increased height */
-            object-fit: cover;
-        }
-
-        .card-body {
-            padding: 18px 18px 6px;
-            text-align: center;
-            color: #374151;
-            line-height: 1.45;
-            font-size: clamp(14px, 1.8vw, 16px);
-        }
-
-        .footer-buttons {
-            display: flex;
-            gap: 14px;
-            justify-content: center;
-            align-items: center;
-            padding: 18px 16px 26px;
-            flex-wrap: nowrap;
-        }
-
-        .btn {
-            appearance: none;
-            border: none;
-            border-radius: 10px;
-            padding: 12px 18px;
-            font-size: 15px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: transform .05s ease, box-shadow .2s ease, background-color .2s ease;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            min-width: 160px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, .08);
-        }
-
-        .btn:active {
-            transform: translateY(1px);
-        }
-
-        .btn-info {
-            background: var(--blue);
-            color: #fff;
-        }
-
-        .btn-info:hover {
-            background: var(--blue-hover);
-        }
-
-        .btn-connect {
-            background: var(--green);
-            color: #04230f;
-        }
-
-        .btn-connect:hover {
-            background: var(--green-hover);
-            color: #fff;
-        }
-
-        @media (max-width:460px) {
-            .footer-buttons {
-                flex-wrap: wrap;
-            }
-
-            .btn {
-                min-width: unset;
-                width: 100%;
-            }
-        }
-    </style>
+    <script src="/md5.js"></script>
     <script>
-        // Trigger trial login to the Mikrotik hotspot. Adjust URL as needed.
-        function connectInternet() {
-            // Replace with your router's hotspot IP and desired redirect
-            var hotspotLoginUrl = 'http://192.168.100.1/login?username=&password=&dst=https://google.com';
-            var img = new Image();
-            img.src = hotspotLoginUrl;
-            // After a short delay, forward user to the chosen landing page
-            setTimeout(function() {
-                window.location.href = 'https://google.com';
-            }, 3000);
+        function doLogin() {
+            document.sendin.username.value = document.login.username.value;
+            document.sendin.password.value = hexMD5('$(chap-id)' + document.login.password.value + '$(chap-challenge)');
+            document.sendin.submit();
+            return false;
         }
     </script>
-</head>
-<body>
-    <!-- Display the original offer page inside an iframe. Note that the remote site must allow framing -->
-    
+    $(endif)
 
+    <div class="ie-fixMinHeight">
+        <div class="main">
+            <div class="wrap animated fadeIn">
+                <form name="login" action="$(link-login-only)" method="post" $(if chap-id)
+                    onSubmit="return doLogin()" $(endif)>
+                    <input type="hidden" name="dst" value="$(link-orig)" />
+                    <input type="hidden" name="popup" value="true" />
 
+                    <!-- Image Card -->
+                    <div style="
+ max-width: 95%;
+ margin: 0 auto;
+ border-radius: 20px;
+ overflow: hidden;
+ box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+ cursor: pointer;
+ "
+                        onclick="openInvestmentLink()">
+                        <img src="{{ asset('img/mardi_ad.jpg') }}" alt="Logo"
+                            style="
+   width: 100%;
+   height: auto;
+   display: block;
+   transition: transform 0.3s ease;
+ "
+                            onmouseover="this.style.transform='scale(1.02)'"
+                            onmouseout="this.style.transform='scale(1)'">
+                    </div>
+                    <!-- Error-only message (trial ტექსტი ქვემოთ ღილაკად გადავიტანეთ) -->
+                    <p class="info $(if error)alert$(endif)">
+                        $(if error)$(error)$(endif)
+                    </p>
 
-    <div class="wrap">
-        <div class="card">
-            <img class="media" src="https://hotspot.splito.ge/hotspot/images/mardi_ad.jpg"
-                alt="Apartments in Batumi for investment">
-            <div class="card-body">
-                <p>The first All-Inclusive hotel in Georgia, offering a wide range of health-enhancing procedures, daily
-                    bus tours to hot springs, and a private beach</p>
-            </div>
-            <div class="footer-buttons">
-                <a class="btn btn-info" href="https://invest.mardi.ge/offer" target="_blank" rel="noopener">About
-                    More</a>
-                <button class="btn btn-connect" onclick="connectWifi()">Connect WiFi</button>
+                    <!-- About Offer Button -->
+                    <div style="text-align: center; margin-top: 20px;">
+                        <button type="button" onclick="openInvestmentLink()"
+                            style="
+              background: linear-gradient(135deg, #63b765 0%, #409242 100%);
+              color: white;
+              border: none;
+              padding: 12px 24px;
+              border-radius: 25px;
+              font-size: 16px;
+              font-weight: 600;
+              cursor: pointer;
+              box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+              transition: all 0.3s ease;
+              text-transform: uppercase;
+              letter-spacing: 1px;">
+                            About Offer
+                        </button>
+                    </div>
+
+                    <!-- Connect Free WiFi Button (მხოლოდ trial ითვის) -->
+                    $(if trial == 'yes')
+                    <div style="text-align: center; margin-top: 12px;">
+                        <a href="$(link-login-only)?dst=$(link-orig-esc)&amp;username=T-$(mac-esc)"
+                            style="
+                 display: inline-block;
+                 background: linear-gradient(135deg, #4A90E2 0%, #357ABD 100%);
+                 color: #fff; text-decoration: none;
+                 padding: 12px 24px;
+                 border-radius: 25px;
+                 font-size: 16px; font-weight: 700;
+                 letter-spacing: .5px; text-transform: uppercase;
+                 box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+                 transition: transform .2s ease, box-shadow .2s ease;"
+                            onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(0,0,0,0.3)'"
+                            onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(0,0,0,0.2)'">
+                            Connect Free WiFi
+                        </a>
+                    </div>
+                    $(endif)
+
+                    <script>
+                        function openInvestmentLink() {
+                            window.open(
+                                'https://invest.mardi.ge/offer?utm_source=wifi&utm_medium=awh-offer&utm_campaign={campaignid}&utm_content={adgroupid}&utm_term={keyword}',
+                                '_blank');
+                        }
+                    </script>
+                </form>
             </div>
         </div>
     </div>
-
-    <div class="controls">
-        <button onclick="connectInternet()">გაუქმება / ინტერნეტის ჩართვა</button>
-    </div>
 </body>
+
 </html>
